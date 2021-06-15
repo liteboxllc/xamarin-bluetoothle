@@ -29,7 +29,9 @@ namespace Plugin.BluetoothLE
         public abstract IObservable<CharacteristicGattResult> DisableNotifications();
         public abstract IObservable<CharacteristicGattResult> Read();
         public abstract IObservable<CharacteristicGattResult> WriteWithoutResponse(byte[] value);
+        public abstract IObservable<CharacteristicGattResult> WriteWithoutResponse(Func<byte[]> value);
         public abstract IObservable<CharacteristicGattResult> Write(byte[] value);
+        public abstract IObservable<CharacteristicGattResult> Write(Func<byte[]> value);
         public abstract IObservable<CharacteristicGattResult> WhenNotificationReceived();
     }
 }

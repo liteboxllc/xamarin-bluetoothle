@@ -42,12 +42,14 @@ namespace Plugin.BluetoothLE
         /// </summary>
         /// <param name="value"></param>
         IObservable<CharacteristicGattResult> WriteWithoutResponse(byte[] value);
+        IObservable<CharacteristicGattResult> WriteWithoutResponse(Func<byte[]> value);
 
         /// <summary>
         /// Writes the value to the remote characteristic
         /// </summary>
         /// <param name="value">The bytes to send</param>
         IObservable<CharacteristicGattResult> Write(byte[] value);
+        IObservable<CharacteristicGattResult> Write(Func<byte[]> value);
 
         /// <summary>
         /// Read characteristic remote value

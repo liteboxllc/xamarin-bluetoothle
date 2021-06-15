@@ -25,6 +25,7 @@ namespace Plugin.BluetoothLE
 
         public override byte[] Value => this.NativeCharacteristic.Value?.ToArray();
 
+        public override IObservable<CharacteristicGattResult> Write(Func<byte[]> value) => Write(value());
 
         public override IObservable<CharacteristicGattResult> Write(byte[] value) => Observable.Create<CharacteristicGattResult>(ob =>
         {

@@ -8,8 +8,8 @@ using Foundation;
 
 namespace Plugin.BluetoothLE
 {
-    public partial class GattCharacteristic : AbstractGattCharacteristic
-    {
+    public partial class GattCharacteristic : AbstractGattCharacteristic {
+        public override IObservable<CharacteristicGattResult> WriteWithoutResponse(Func<byte[]> value) => WriteWithoutResponse(value());
         public override IObservable<CharacteristicGattResult> WriteWithoutResponse(byte[] value) => Observable.Create<CharacteristicGattResult>(ob =>
         {
             this.AssertWrite(false);

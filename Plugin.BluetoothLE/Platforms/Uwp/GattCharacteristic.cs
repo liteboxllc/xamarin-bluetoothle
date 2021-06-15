@@ -51,6 +51,7 @@ namespace Plugin.BluetoothLE
             return this.descriptorOb;
         }
 
+        public override IObservable<CharacteristicGattResult> WriteWithoutResponse(Func<byte[]> value) => WriteWithoutResponse(value());
 
         public override IObservable<CharacteristicGattResult> WriteWithoutResponse(byte[] value) => Observable.FromAsync(async _ =>
         {
@@ -63,7 +64,7 @@ namespace Plugin.BluetoothLE
             return new CharacteristicGattResult(this, value);
         });
 
-
+        public override IObservable<CharacteristicGattResult> Write(Func<byte[]> value) => Write(value());
         // TODO: reliable write
         public override IObservable<CharacteristicGattResult> Write(byte[] value) => Observable.FromAsync(async ct =>
         {

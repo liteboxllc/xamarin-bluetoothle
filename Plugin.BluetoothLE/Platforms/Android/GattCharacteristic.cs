@@ -33,8 +33,9 @@ namespace Plugin.BluetoothLE
 
         public override byte[] Value => this.native.GetValue();
 
+        public override IObservable<CharacteristicGattResult> WriteWithoutResponse(byte[] value) => WriteWithoutResponse(() => { return value; });
 
-        public override IObservable<CharacteristicGattResult> WriteWithoutResponse(byte[] value) => this.context.Invoke(Observable.Create<CharacteristicGattResult>(ob =>
+        public override IObservable<CharacteristicGattResult> WriteWithoutResponse(Func<byte[]> value) => this.context.Invoke(Observable.Create<CharacteristicGattResult>(ob =>
         {
             this.AssertWrite(false);
 
@@ -44,13 +45,19 @@ namespace Plugin.BluetoothLE
                 {
                     this.native.WriteType = GattWriteType.NoResponse;
 
-                    if (!this.native.SetValue(value))
+                    byte[] toWrite = value();
+                    if (value == null)
+                    {
+                        return;
+                    }
+
+                    if (!this.native.SetValue(toWrite))
                         throw new BleException("Failed to write characteristic value");
 
                     if (!this.context.Gatt.WriteCharacteristic(this.native))
                         throw new BleException("Failed to write to characteristic");
 
-                    ob.Respond( new CharacteristicGattResult(this, value));
+                    ob.Respond(new CharacteristicGattResult(this, toWrite));
                 }
                 catch (Exception ex)
                 {
@@ -61,10 +68,17 @@ namespace Plugin.BluetoothLE
             return Disposable.Empty;
         }));
 
+        public override IObservable<CharacteristicGattResult> Write(byte[] value) => Write(() => { return value; });
 
-        public override IObservable<CharacteristicGattResult> Write(byte[] value) => this.context.Invoke(Observable.Create<CharacteristicGattResult>(ob =>
+        public override IObservable<CharacteristicGattResult> Write(Func<byte[]> value) => this.context.Invoke(Observable.Create<CharacteristicGattResult>(ob =>
         {
             this.AssertWrite(false);
+
+            byte[] toWrite = value();
+            if (value == null)
+            {
+                return null;
+            }
 
             var sub = this.context
                 .Callbacks
@@ -74,7 +88,7 @@ namespace Plugin.BluetoothLE
                 {
                     Log.Debug(BleLogCategory.Characteristic, "write event - " + args.Characteristic.Uuid);
                     if (args.IsSuccessful)
-                        ob.Respond(new CharacteristicGattResult(this, value));
+                        ob.Respond(new CharacteristicGattResult(this, toWrite));
                     else
                         ob.OnError(new BleException($"Failed to write characteristic - {args.Status}"));
                 });
@@ -85,7 +99,7 @@ namespace Plugin.BluetoothLE
                 try
                 {
                     this.native.WriteType = GattWriteType.Default;
-                    this.native.SetValue(value);
+                    this.native.SetValue(toWrite);
                     //if (!this.native.SetValue(value))
                     //ob.OnError(new BleException("Failed to set characteristic value"));
 
